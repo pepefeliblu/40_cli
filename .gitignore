@@ -1,0 +1,30 @@
+# C++ Compiled Files
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+40_cli
+
+# CMake
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+
+# JetBrains / CLion
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# macOS
+.DS_Store
+
+# Temporary files
+*.swp
+*~
