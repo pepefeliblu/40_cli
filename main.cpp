@@ -1,502 +1,493 @@
-//CMP-320 ProgramaciÛn para ciencias e ingenierÌa 2
-//Profesor: Aldo Cassola
-//Juan JosÈ Rueda
-//00131765
-//CUARENTA
+// CMP-320 Programaci√≥n para ciencias e ingenier√≠a 2
+// Profesor: Aldo Cassola
+// Juan Jos√© Rueda
+// 00131765
+// CUARENTA
 /*
-	Este programa simula un cuarenta basadas en las siguientes reglas tradicionales:
-	-No hay 38 que no juega
-	-Se puede hacer caÌda y limpia por 4 puntos
-	-DespuÈs de 38 no vale el cartÛn
-	-SÛlo se puede hacer suma con dos cartas
+    Este programa simula un cuarenta basadas en las siguientes reglas
+   tradicionales: -No hay 38 que no juega -Se puede hacer ca√≠da y limpia por 4
+   puntos -Despu√©s de 38 no vale el cart√≥n -Solo se puede hacer suma con dos
+   cartas
 */
-#include <iostream>
-#include <vector>
-#include "Carta40.h" 
-#include  "Jugador.h"
+#include "Carta40.h"
 #include "Cortana.h"
+#include "Jugador.h"
 #include "Usuario.h"
-#include <ctime>
 #include <cctype>
 #include <cstdlib>
+#include <ctime>
 #include <iomanip>
+#include <iostream>
 #include <istream>
+#include <vector>
+
 
 using namespace std;
-//Imprime las cartas dentro del arrelgo Mazo
+
+// Imprime las cartas dentro del arreglo Mazo
 void imprimirMazo(vector<Carta40> &);
-//Imprime las cartjas jugadas 
+// Imprime las cartas jugadas
 void imprimirMesa(vector<Carta40> &);
-//Se ejecuta si el usuario reparte
+// Se ejecuta si el usuario reparte
 void userComienzo();
-//Se ejecuta si la computadora reparte
+// Se ejecuta si la computadora reparte
 void pCComienzo();
-//Revisa si alguno de los dos jugadores ha llegado a 40 puntos
+// Revisa si alguno de los dos jugadores ha llegado a 40 puntos
 void revisarVictoria(Jugador *, Jugador *);
-//FunciÛn que lanzar un n˙mero aleatorio y lo compara con el input del ususario
-bool decider( int);
-//Da un nombre a la computadora
+// Funci√≥n que lanzar un n√∫mero aleatorio y lo compara con el input del usuario
+bool decider(int);
+// Da un nombre a la computadora
 string nameGen();
-//Arrelgo que guarda todas las cartas
+
+// Arreglo que guarda todas las cartas
 vector<Carta40> mazo(40);
-//Arreglo que guarda las cartas jugadas
+// Arreglo que guarda las cartas jugadas
 vector<Carta40> mesa;
-//Puntero al jugador humano
+// Puntero al jugador humano
 Usuario *user;
-//Puntero al jugador autom·tico
-Cortana *pC;
+// Puntero al jugador autom√°tico
+Cortana *pc;
 
-int main()
- {
- 	//Se define la semilla para la funciÛn rand()
-	srand( time(0));
-	//Imprima carcateres con acentos y Ò
-	setlocale(LC_ALL, "Spanish_Ecuador.1252");
-	//Se llena el mazo con las cartas
-	for(int i = 1; i <= 4; i++)
-	{
-		
-		static int centinela = 0;
-		for(int j = 0; j < 10; j++)
-		{
-			mazo[centinela]= Carta40(j, i);
-			centinela++;
-		}
-		
-	}
-	
-	cout << setw(30) << "***********CUARENTA***********" << endl;
-	cout << "°Bienvenido! para iniciar una nueva partida por favor escribe tu nombre y presiona enter" <<endl << endl;
-	//Se define la identidad del jugador humano y se crea el objeto
-	string nombre;
-	cin >> nombre;
-	
-	user = new Usuario(nombre);
-	//Se genera el jugador autom·tico con un nombre aleatorio
-	string maquina = nameGen();
-	pC =  new Cortana(maquina);
-	cout << endl<< endl << "INSTRUCCIONES" << endl << user->getNombre() << " para realizar acciones escribe\n\n\n 'partir' -> para partir el mazo\n 'caida' -> para realizar caÌda\n 'sumar' -> para sumar dos cartas\n 'escalera' -> para hacer una escalera ascendente de cartas\n 'robar' -> para robar una carta de la mesa \n 'lanzar' -> para botar una carta \n  seguido por la carta.\n"
-		<< "Por ejemplo, si quieres robar una carta de la mesa usando el As de corazones  escribe 'robar AC '\n\n" << endl;
-	cout << endl << endl << user->getNombre() << " tu oponente ser· " << pC->getNombre() << endl;
-	
-	cout << endl<< "Para decidir quien reparte adivina el valor dentro de un rango del 1 al 4" << endl;
-	//Se decide quien comienza 
-	int val;
-	
-	cin >> val;
-	
-	//Si el usuario adivina  el comienza y se alternan hazta que alguien gane
-	if(decider(val))
-	{
-		
-		while(!pC->getGanar() && !user->getGanar())
-		{
-			//Se imprime el mazo para demostrar que est· completo
-			imprimirMazo(mazo);
-			//Reparte el usuario
-			userComienzo();	
-			imprimirMazo(mazo);
-			//Reparte la computadora
-			pCComienzo();
-			
-		}
-	}
-	else
-	{
-		while(!pC->getGanar() && !user->getGanar())
-		{
-			imprimirMazo(mazo);
-			pCComienzo();
-			imprimirMazo(mazo);
-			userComienzo();
-			
-		}
-	}
-	
+int main() {
+  // Se define la semilla para la funci√≥n rand()
+  srand(time(0));
+  // Imprima caracteres con acentos y √±
+  setlocale(LC_ALL, "Spanish_Ecuador.1252");
+  // Se llena el mazo con las cartas
+  for (int i = 1; i <= 4; i++) {
 
-}
-//Toma un arreglo de Cartas e imprime cada una en pantalla
-void imprimirMazo(vector<Carta40> & mazo_)
-{
-	for(int i = 0; i< mazo_.size(); i++)
-	{
-		if(i%10 == 0 && i != 0)
-		cout<< endl;
-		mazo_[i].dibujarCarta();
-	}
-	cout << endl <<  endl;
-}
-//Imprime las cartas jugadas con un margen izquierdo y de 5 por fila
-void imprimirMesa(vector<Carta40> & mesa_)
-{
-	
-	for(int i = 0; i< mesa_.size(); i++)
-	{
-		if(i%6 == 0 && i != 0)
-		cout<< setw(10) << endl;
-		mesa_[i].dibujarCarta();
-	}
-	
-	cout<< endl;
-}
-//Lanaza un n˙mero aleatorio entre 0-9 y asigna un nombre dependiendo del valor
-string nameGen()
-{
-	int azar = rand()%10;
-	
+    static int centinela = 0;
+    for (int j = 0; j < 10; j++) {
+      mazo[centinela] = Carta40(j, i);
+      centinela++;
+    }
+  }
 
-	string nombre;
-	switch(azar)
-	{
-		case 0:
-			nombre = "Carlos";
-			break;
-		case 1:
-			nombre = "Julia";
-			break;
-		case 2:
-			nombre = "Marcus";
-			break;
-		case 3:
-			nombre = "Silvia";
-			break;
-		case 4:
-			nombre = "Erik";
-			break;
-		case 5:
-			nombre = "SofÌa";
-			break;
-		case 6:
-			nombre = "MartÌn";
-			break;
-		case 7:
-			nombre = "Alejandra";
-			break;
-		case 8:
-			nombre = "Esteban";
-			break;
-		case 9:
-			nombre = "Massiel";
-			break;
-	}
-	
-	return nombre;
+  cout << setw(30) << "***********CUARENTA***********" << endl;
+  cout << "¬°Bienvenido! para iniciar una nueva partida por favor escribe tu "
+          "nombre y presiona enter"
+       << endl
+       << endl;
+  // Se define la identidad del jugador humano y se crea el objeto
+  string nombre;
+  cin >> nombre;
+
+  user = new Usuario(nombre);
+  // Se genera el jugador autom√°tico con un nombre aleatorio
+  string maquina = nameGen();
+  pc = new Cortana(maquina);
+  cout << endl
+       << endl
+       << "INSTRUCCIONES" << endl
+       << user->getNombre()
+       << " para realizar acciones escribe\n\n\n 'partir' -> para partir el "
+          "mazo\n 'caida' -> para realizar ca√≠da\n 'sumar' -> para sumar dos "
+          "cartas\n 'escalera' -> para hacer una escalera ascendente de "
+          "cartas\n 'robar' -> para robar una carta de la mesa \n 'lanzar' -> "
+          "para botar una carta \n  seguido por la carta.\n"
+       << "Por ejemplo, si quieres robar una carta de la mesa usando el As de "
+          "corazones  escribe 'robar AC '\n\n"
+       << endl;
+  cout << endl
+       << endl
+       << user->getNombre() << " tu oponente ser√° " << pc->getNombre() << endl;
+
+  cout << endl
+       << "Para decidir quien reparte adivina el valor dentro de un rango del "
+          "1 al 4"
+       << endl;
+  // Se decide quien comienza
+  int val;
+
+  cin >> val;
+
+  // Si el usuario adivina √©l comienza y se alternan hasta que alguien gane
+  if (decider(val)) {
+
+    while (!pc->getGanar() && !user->getGanar()) {
+      // Se imprime el mazo para demostrar que est√° completo
+      imprimirMazo(mazo);
+      // Reparte el usuario
+      userComienzo();
+      imprimirMazo(mazo);
+      // Reparte la computadora
+      pCComienzo();
+    }
+  } else {
+    while (!pc->getGanar() && !user->getGanar()) {
+      imprimirMazo(mazo);
+      pCComienzo();
+      imprimirMazo(mazo);
+      userComienzo();
+    }
+  }
 }
-//toma un numero  entre 1-4 y lo compara con uno dado por el ususario, si coincide el reparte 
-bool decider(int val_)
-{
-	int random = rand()%4 + 1;
-	
-	if(val_ == random)
-	{
-		cout << "Adivinaste el valor!\n ";
-		return true;
-	}
-	else
-	{
-		cout << "El valor era " << random << endl;
-		return false;
-	}
-		
+// Toma un arreglo de Cartas e imprime cada una en pantalla
+void imprimirMazo(vector<Carta40> &mazo_) {
+  for (int i = 0; i < mazo_.size(); i++) {
+    if (i % 10 == 0 && i != 0)
+      cout << endl;
+    mazo_[i].dibujarCarta();
+  }
+  cout << endl << endl;
+}
+// Imprime las cartas jugadas con un margen izquierdo y de 5 por fila
+void imprimirMesa(vector<Carta40> &mesa_) {
+
+  for (int i = 0; i < mesa_.size(); i++) {
+    if (i % 6 == 0 && i != 0)
+      cout << setw(10) << endl;
+    mesa_[i].dibujarCarta();
+  }
+
+  cout << endl;
+}
+// Lanza un n√∫mero aleatorio entre 0-9 y asigna un nombre dependiendo del valor
+string nameGen() {
+  int azar = rand() % 10;
+
+  string nombre;
+  switch (azar) {
+  case 0:
+    nombre = "Carlos";
+    break;
+  case 1:
+    nombre = "Julia";
+    break;
+  case 2:
+    nombre = "Marcus";
+    break;
+  case 3:
+    nombre = "Silvia";
+    break;
+  case 4:
+    nombre = "Erik";
+    break;
+  case 5:
+    nombre = "Sof√≠a";
+    break;
+  case 6:
+    nombre = "Mart√≠n";
+    break;
+  case 7:
+    nombre = "Alejandra";
+    break;
+  case 8:
+    nombre = "Esteban";
+    break;
+  case 9:
+    nombre = "Massiel";
+    break;
+  }
+
+  return nombre;
+}
+// toma un n√∫mero entre 1-4 y lo compara con uno dado por el usuario, si
+// coincide √©l reparte
+bool decider(int val_) {
+  int random = rand() % 4 + 1;
+
+  if (val_ == random) {
+    cout << "Adivinaste el valor!\n ";
+    return true;
+  } else {
+    cout << "El valor era " << random << endl;
+    return false;
+  }
 }
 
-//Si el usuario comienza
-void userComienzo()
-{
-	//Mientras nadie haya ganado
-	if( (!user->getGanar() && !pC->getGanar()))
-	{
-		cout << endl << "Tu repartes, barajas el mazo de cartas y pides a " << pC->getNombre() << " que parta" << endl;
-		user->barajar(mazo);
-		pC->partir(mazo);
-	
-		cout << endl<< "Repartes 5 cartas a " << pC->getNombre() << endl;
-		//Reparte 5 cartas para el oponente
-		user->repartir(pC, mazo);
-		//revisa si tiene ronda
-		pC->guapo();
-		cout << endl<< "Tomas 5 cartas " << endl;
-		//se da 5 cartas
-		user->repartir(user, mazo);
-		//revisa si tiene ronda
-		user->guapo();
-		//miestra la mano del jugador
-		cout << user->getNombre() << ": "; user->imprimirMano();
-		cout << endl<< pC->getNombre() << " comienza" << endl;
-	
-		//se juega toda una ronda
-		for(int i = 0; i < 20 ; i++)
-		{
-			//escoge una carta aleatoria
-			Carta40 gen;
-			gen = pC->randPicker();
-			//juega esa carta aleatoria
-			pC->jugar(gen, mesa);
-			//revisa si alguien ganÛ
-			revisarVictoria(user, pC);
-			//se imprime la mesa y los puntajes
-			cout << endl << "****************************************************************************************\n";
-			cout << endl << "MESA --->  " ; imprimirMesa(mesa); 
-			cout << setw(10) << user->getNombre() << ": " << user->getPuntaje() << setw(10) << pC->getNombre() << ": " << pC->getPuntaje() << endl;
-			cout << endl; 
-			cout << endl << "****************************************************************************************\n";
+// Si el usuario comienza
+void userComienzo() {
+  // Mientras nadie haya ganado
+  if (!user->getGanar() && !pc->getGanar()) {
+    cout << endl
+         << "Tu repartes, barajas el mazo de cartas y pides a "
+         << pc->getNombre() << " que parta" << endl;
+    user->barajar(mazo);
+    pc->partir(mazo);
 
-			cout << user->getNombre() << ": "; user->imprimirMano();
-			cout << endl;
-		
-			//se toma la acciÛn y la carta del ususario
-			string accion;
-			char carta[2];
-		
-			cin>> accion;
-			cin >> carta[0] >> carta[1];
-			carta[0] = static_cast<char>(toupper(carta[0]));
-			carta[1] = static_cast<char>(toupper(carta[1]));
-			//revisa si esa carta existe en la mano
-			Carta40 temp(carta);
-			
-			if(user->checkExist(temp))
-			{
-				//juega la carta con la acciÛn respectiva
-				user->jugar(temp, mesa, accion);
-				//revisa si alguien ganÛ
-				revisarVictoria(user, pC);
-				//se imprime la mesa con los puntajes
-				cout << endl << "****************************************************************************************\n";
+    cout << endl << "Repartes 5 cartas a " << pc->getNombre() << endl;
+    // Reparte 5 cartas para el oponente
+    user->repartir(pc, mazo);
+    // revisa si tiene ronda
+    pc->guapo();
+    cout << endl << "Tomas 5 cartas " << endl;
+    // se da 5 cartas
+    user->repartir(user, mazo);
+    // revisa si tiene ronda
+    user->guapo();
+    // muestra la mano del jugador
+    cout << user->getNombre() << ": ";
+    user->imprimirMano();
+    cout << endl << pc->getNombre() << " comienza" << endl;
 
-				cout << endl << "MESA --->  " ; imprimirMesa(mesa); 
-				cout << setw(10) << user->getNombre() << ": " << user->getPuntaje() << setw(10) << pC->getNombre() << ": " << pC->getPuntaje() << endl;
-				cout << endl; 
-				cout << endl << "****************************************************************************************\n";
-				
-			
+    // se juega toda una ronda
+    for (int i = 0; i < 20; i++) {
+      // escoge una carta aleatoria
+      Carta40 gen;
+      gen = pc->randPicker();
+      // juega esa carta aleatoria
+      pc->jugar(gen, mesa);
+      // revisa si alguien gan√≥
+      revisarVictoria(user, pc);
+      // se imprime la mesa y los puntajes
+      cout << endl
+           << "****************************************************************"
+              "************************\n";
+      cout << endl << "MESA --->  ";
+      imprimirMesa(mesa);
+      cout << setw(10) << user->getNombre() << ": " << user->getPuntaje()
+           << setw(10) << pc->getNombre() << ": " << pc->getPuntaje() << endl;
+      cout << endl;
+      cout << endl
+           << "****************************************************************"
+              "************************\n";
 
-			}
-			else 
-			{
-				//si la carta no existe en la mano
-				while(!user->checkExist(temp))
-				{
-				//toma valores nuevos para la carta
-					cout << endl << "No tienes la carta que ingresaste, escribe nuevamente la carta" << endl;
-					cin >> carta[0] >> carta[1];
-					carta[0] = static_cast<char>(toupper(carta[0]));
-					carta[1] = static_cast<char>(toupper(carta[1]));
-					temp = Carta40(carta);
-					
-				
-				}
-				//juega la carta corregida 
-				user->jugar(temp, mesa, accion);
-				//revisa si alguien ganÛ
-				revisarVictoria(user, pC);
-		
-		}
-		
-		
-		//si la m·quina se queda sin cartas y el mazo no est· vacio
-		if(pC->sinMano() && !mazo.empty())
-		{
-			//se reparten cartas para la m·quina y se revisa si hay ronda
-			user->repartir(pC, mazo);
-			pC->guapo();
-		}
-		//si el ususario se queda sin cartas y el mazo no est· vacio 
-		if(user->sinMano() && !mazo.empty())
-		{
-			//reparte cartas para el usuario y revisa si tiene ronda
-			user->repartir(user, mazo);
-			user->guapo();
-		}
-	}
+      cout << user->getNombre() << ": ";
+      user->imprimirMano();
+      cout << endl;
+
+      // se toma la acci√≥n y la carta del usuario
+      string accion;
+      char carta[2];
+
+      cin >> accion;
+      cin >> carta[0] >> carta[1];
+      carta[0] = static_cast<char>(toupper(carta[0]));
+      carta[1] = static_cast<char>(toupper(carta[1]));
+      // revisa si esa carta existe en la mano
+      Carta40 temp(carta);
+
+      if (user->checkExist(temp)) {
+        // juega la carta con la acci√≥n respectiva
+        user->jugar(temp, mesa, accion);
+        // revisa si alguien gan√≥
+        revisarVictoria(user, pc);
+        // se imprime la mesa con los puntajes
+        cout << endl
+             << "**************************************************************"
+                "**************************\n";
+
+        cout << endl << "MESA --->  ";
+        imprimirMesa(mesa);
+        cout << setw(10) << user->getNombre() << ": " << user->getPuntaje()
+             << setw(10) << pc->getNombre() << ": " << pc->getPuntaje() << endl;
+        cout << endl;
+        cout << endl
+             << "**************************************************************"
+                "**************************\n";
+      } else {
+        // si la carta no existe en la mano
+        while (!user->checkExist(temp)) {
+          // toma valores nuevos para la carta
+          cout << endl
+               << "No tienes la carta que ingresaste, escribe nuevamente la "
+                  "carta"
+               << endl;
+          cin >> carta[0] >> carta[1];
+          carta[0] = static_cast<char>(toupper(carta[0]));
+          carta[1] = static_cast<char>(toupper(carta[1]));
+          temp = Carta40(carta);
+        }
+        // juega la carta corregida
+        user->jugar(temp, mesa, accion);
+        // revisa si alguien gan√≥
+        revisarVictoria(user, pc);
+      }
+
+      // si la m√°quina se queda sin cartas y el mazo no est√° vacio
+      if (pc->sinMano() && !mazo.empty()) {
+        // se reparten cartas para la m√°quina y se revisa si hay ronda
+        user->repartir(pc, mazo);
+        pc->guapo();
+      }
+      // si el ususario se queda sin cartas y el mazo no est√° vacio
+      if (user->sinMano() && !mazo.empty()) {
+        // reparte cartas para el usuario y revisa si tiene ronda
+        user->repartir(user, mazo);
+        user->guapo();
+      }
+    }
+  }
+  // si se acaban las catas del mazo cuenta los cartones y asigna los puntos
+  // respectivos
+  if (mazo.empty()) {
+    cout << endl << "Se cuentan los cartones\n";
+    // calcula el cart√≥n de la m√°quina
+    pc->calcularCarton();
+    // calcula el carton del usuario
+    user->calcularCarton();
+    // Imprime el puntaje del usuario y la m√°quina
+    cout << setw(10) << user->getNombre() << ": " << user->getPuntaje()
+         << setw(10) << pc->getNombre() << ": " << pc->getPuntaje() << endl;
+    cout << endl;
+    // devuelve los cartones al mazo de cartas original
+    pc->devolverCarton(mazo);
+    user->devolverCarton(mazo);
+    // devuelve las cartas restantes de la mesa y luego limpia la mesa
+    mazo.insert(mazo.end(), mesa.begin(), mesa.end());
+    mesa.clear();
+    // revisa si alguien gan√≥
+    revisarVictoria(user, pc);
+  }
 }
-	//si se acaban las catas del mazo cuenta los cartones y asigna los puntos respectivos
-	if(mazo.empty())
-	{
-		cout << endl << "Se cuentan los cartones\n";
-		//calcula el cartÛn de la m·quina
-		pC->calcularCarton();
-		//calcula el carton del usuario
-		user->calcularCarton();
-		//Imprime  el puntaje del ususario y la m·quina
-		cout << setw(10) << user->getNombre() << ": " << user->getPuntaje() << setw(10) << pC->getNombre() << ": " << pC->getPuntaje() << endl;
-		cout << endl; 
-		//devuelve los canrtones al mazo de cartas original
-		pC->devolverCarton(mazo);
-		user->devolverCarton(mazo);
-		//devuelve las cartas restantes de la mesa y luego limpia la mesa
-		mazo.insert(mazo.end(), mesa.begin(), mesa.end());
-		mesa.clear();
-		//revisa si alguien ganÛ
-		revisarVictoria(user, pC);
-	}
-	
+// Si el usuario comienza
+void pCComienzo() {
+  // revisa si alguien gan√≥
+  revisarVictoria(user, pc);
+  if ((!user->getGanar() && !pc->getGanar())) {
+    // la m√°quina baraja
+    cout << endl
+         << pc->getNombre()
+         << " reparte, baraja el mazo de cartas y te pide que partas" << endl;
+    pc->barajar(mazo);
+    // hace que el usuario parta
+    string partir;
+
+    cin >> partir;
+    // si no parte correctamente se penaliza dandole al oponente 10 puntos
+    if (partir == "partir") {
+      user->partir(mazo);
+    } else {
+      cout << endl
+           << "No partiste, son 10 puntos para " << pc->getNombre() << endl;
+      pc->setPuntaje(10);
+    }
+
+    // La m√°quina reparte 5 cartas al usuario y revisa si tiene cart√≥n
+    cout << endl << pc->getNombre() << " te reparte 5 cartas " << endl;
+
+    pc->repartir(user, mazo);
+    user->guapo();
+    // La m√°quina toma 5 cartas y revisa si tiene cart√≥n
+    cout << endl << pc->getNombre() << " toma 5 cartas " << endl;
+    pc->repartir(pc, mazo);
+    pc->guapo();
+
+    cout << endl << "Tu comienzas" << endl;
+
+    // Se imprime la mano del usuario y se toma su acci√≥n y la carta a lanzar
+    for (int i = 0; i < 20; i++) {
+      cout << user->getNombre() << ": ";
+      user->imprimirMano();
+      cout << endl;
+      string accion;
+      char carta[2];
+
+      cin >> accion;
+      cin >> carta[0] >> carta[1];
+      carta[0] = static_cast<char>(toupper(carta[0]));
+      carta[1] = static_cast<char>(toupper(carta[1]));
+
+      Carta40 temp(carta);
+      // Si la carta existe la juega
+      if (user->checkExist(temp)) {
+        user->jugar(temp, mesa, accion);
+        revisarVictoria(user, pc);
+
+        // Imprime la mesa con los puntajes correspondientes
+        cout << endl
+             << "**************************************************************"
+                "**************************\n";
+
+        cout << endl << "MESA --->  ";
+        imprimirMesa(mesa);
+        cout << setw(10) << user->getNombre() << ": " << user->getPuntaje()
+             << setw(10) << pc->getNombre() << ": " << pc->getPuntaje() << endl;
+        cout << endl;
+        cout << endl
+             << "**************************************************************"
+                "**************************\n";
+      } else {
+        // si no existe la carta pide que la ingrese nuevamente
+        while (!user->checkExist(temp)) {
+
+          cout << endl
+               << "No tienes la carta que ingresaste, escribe nuevamente la "
+                  "carta"
+               << endl;
+          cin >> carta[0] >> carta[1];
+          carta[0] = static_cast<char>(toupper(carta[0]));
+          carta[1] = static_cast<char>(toupper(carta[1]));
+          temp = Carta40(carta);
+        }
+        // juega la carta y revisa si alguien gan√≥
+        user->jugar(temp, mesa, accion);
+        revisarVictoria(user, pc);
+      }
+      // La m√°quina escoge una carta al azar y la juega
+      Carta40 gen;
+      gen = pc->randPicker();
+
+      pc->jugar(gen, mesa);
+      // Revisa si alguien gan√≥ e imprime la mesa
+      revisarVictoria(user, pc);
+      cout << endl
+           << "****************************************************************"
+              "************************\n";
+      cout << endl << "MESA --->  ";
+      imprimirMesa(mesa);
+      cout << setw(10) << user->getNombre() << ": " << user->getPuntaje()
+           << setw(10) << pc->getNombre() << ": " << pc->getPuntaje() << endl;
+      cout << endl;
+      cout << endl
+           << "****************************************************************"
+              "************************\n";
+      cout << endl;
+
+      // Si no tiene m√°s cartas el usuario y el mazo no est√° vacio se reparten
+      // m√°s cartas, se revisa si tiene ronda
+      if (user->sinMano() && !mazo.empty()) {
+        pc->repartir(user, mazo);
+        user->guapo();
+      }
+      // Si no tiene m√°s cartas la m√°quina...
+      if (pc->sinMano() && !mazo.empty()) {
+        pc->repartir(pc, mazo);
+        pc->guapo();
+      }
+    }
+  }
+
+  // Si se acaban las cartas del mazo se cuentan los cartones y se imprimen los
+  // puntos asignados
+  if (mazo.empty()) {
+    cout << endl << "Se cuentan los cartones\n";
+    pc->calcularCarton();
+    user->calcularCarton();
+    cout << setw(10) << user->getNombre() << ": " << user->getPuntaje()
+         << setw(10) << pc->getNombre() << ": " << pc->getPuntaje() << endl;
+    cout << endl;
+    pc->devolverCarton(mazo);
+    user->devolverCarton(mazo);
+    // devuelve las cartas de la mesa al mazo y la limpia
+    mazo.insert(mazo.end(), mesa.begin(), mesa.end());
+    mesa.clear();
+    // se revisa si alguien gan√≥
+    revisarVictoria(user, pc);
+  }
 }
-//Si el ususaruio comienza
-void pCComienzo()
-{
-	//revisa si alguien ganÛ
-	revisarVictoria(user, pC);
-	if( (!user->getGanar() && !pC->getGanar()))
-	{
-		//la m·quina baraja
-		cout << endl <<  pC->getNombre() << " reparte, baraja el mazo de cartas y te pide que partas" << endl;
-		pC->barajar(mazo);
-		//hace que el usuario parta
-		string partir;
-	
-		cin >> partir;
-		//si no parte correctamente se penzaliza dandole al oponente 10 puntos
-		if(partir == "partir")
-		{
-			user->partir(mazo);
-		}
-		else
-		{
-			cout << endl << "No partiste, son 10 puntos para " << pC->getNombre() << endl;
-			pC->setPuntaje(10);
-		}
-	
-	
-	
-	
-		//La m·quina reparte 5 cartas al ususario y revisa si tiene cartÛn
-		cout << endl<< pC->getNombre()<< " te reparte 5 cartas "  << endl;
-		
-		pC->repartir(user, mazo);
-		user->guapo();
-		//La maquina toma 5 cartas y revisa si tiene cartÛn
-		cout << endl<< pC->getNombre() << " toma 5 cartas " << endl;
-		pC->repartir(pC, mazo);
-		pC->guapo();
+// Revisa si alguno de los jugadores tiene 40 o m√°s puntos y le asigna la
+// victoria
+void revisarVictoria(Jugador *A, Jugador *B) {
+  // Si el usuario gana...
+  if (A->getPuntaje() >= 40) {
+    A->setGanar(true);
+    cout << endl
+         << "¬°Felicitaciones " << A->getNombre() << "! haz derrotado a "
+         << B->getNombre() << endl;
+  }
+  // Si la m√°quina gana...
+  else if (B->getPuntaje() >= 40) {
 
-		cout << endl<< "Tu comienzas" << endl;
-	
-	//Se imprime la mano del ususario y se toma su acciÛn y la carta a lanzar 
-		for(int i = 0; i < 20 ; i++)
-		{
-			cout << user->getNombre() << ": "; user->imprimirMano();
-			cout << endl;
-			string accion;
-			char carta[2];
-		
-			cin>> accion;
-			cin >> carta[0] >> carta[1];
-			carta[0] = static_cast<char>(toupper(carta[0]));
-			carta[1] = static_cast<char>(toupper(carta[1]));
-			
-			
-			Carta40 temp(carta);
-			//Si la carta existe la juega
-			if(user->checkExist(temp))
-			{
-				user->jugar(temp, mesa, accion);
-				revisarVictoria(user, pC);
-				
-				//Imprime la mesa con los puntajes correspondientes
-				cout << endl << "****************************************************************************************\n";
-
-				cout << endl << "MESA --->  " ; imprimirMesa(mesa); 
-				cout << setw(10) << user->getNombre() << ": " << user->getPuntaje() << setw(10) << pC->getNombre() << ": " << pC->getPuntaje() << endl;
-				cout << endl; 
-				cout << endl << "****************************************************************************************\n";
-
-			}
-			else 
-			{
-				//si no existe la carta pide que la ingrese nuevamente
-				while(!user->checkExist(temp))
-				{
-				
-					cout << endl << "No tienes la carta que ingresaste, escribe nuevamente la carta" << endl;
-					cin >> carta[0] >> carta[1];
-					carta[0] = static_cast<char>(toupper(carta[0]));
-					carta[1] = static_cast<char>(toupper(carta[1]));
-					temp = Carta40(carta);
-					
-				
-				}
-				//juega la carta y revisa si alguien ganÛ
-				user->jugar(temp, mesa, accion);
-				revisarVictoria(user, pC);
-				
-			}
-			//La m·quina escoge una carta al azar y la juega
-			Carta40 gen;
-			gen = pC->randPicker();
-	
-			pC->jugar(gen, mesa);
-			//Revisa si alguien ganÛ e imprime la mesa
-			revisarVictoria(user, pC);
-			cout << endl << "****************************************************************************************\n";
-			cout << endl << "MESA --->  " ; imprimirMesa(mesa); 
-			cout << setw(10) << user->getNombre() << ": " << user->getPuntaje() << setw(10) << pC->getNombre() << ": " << pC->getPuntaje() << endl;
-			cout << endl; 
-			cout << endl << "****************************************************************************************\n";
-			cout << endl;
-		
-		
-		
-			//Si no tiene m·s cartas el ususario y el mazo no est· vacio se reparten m·s cartas, se revisa si tiene ronda
-			if(user->sinMano() && !mazo.empty())
-			{
-				pC->repartir(user, mazo);
-				user->guapo();
-			}
-			//Si no tiene m·s cartas la m·quina...
-			if(pC->sinMano() && !mazo.empty())
-			{
-				pC->repartir(pC, mazo);
-				pC->guapo();
-			}
-		}
-	}
-	
-	//Si se acaban las cartas del mazo se cuentan los cartones y se imprimen los puntos asignados
-	if(mazo.empty())
-	{
-		cout << endl << "Se cuentan los cartones\n";
-		pC->calcularCarton();
-		user->calcularCarton();
-		cout << setw(10) << user->getNombre() << ": " << user->getPuntaje() << setw(10) << pC->getNombre() << ": " << pC->getPuntaje() << endl;
-		cout << endl; 
-		pC->devolverCarton(mazo);
-		user->devolverCarton(mazo);
-		//devuelve las cartas de la mesa al mazo y la limpia
-		mazo.insert(mazo.end(), mesa.begin(), mesa.end());
-		mesa.clear();
-		//se revisa si alguien ganÛ
-		revisarVictoria(user, pC);
-	}
-	
+    B->setGanar(true);
+    cout << endl
+         << B->getNombre() << " te ha derrotado mejor suerte la proxima"
+         << endl;
+  }
+  // Si alguno de los dos gan√≥ se termina el programa
+  if (A->getGanar() == true || B->getGanar() == true) {
+    cout << "Presiona cualquier tecla para salir\n";
+    exit(0);
+  }
 }
-//Revisa si alguno de los jugadores tiene 40 o m·s puntos y le asigna la victoria
-void revisarVictoria(Jugador *A, Jugador *B)
-{
-	//Si el usuario gana...
-	if(A->getPuntaje() >=40)
-	{
-		A->setGanar(true);
-		cout << endl << "°Felicitaciones " << A->getNombre() << "! haz derrotado a " << B->getNombre() << endl; 
-				
-				
-	}
-	//Si la m·quina gana...
-	else if(B->getPuntaje() >=40)
-	{
-					
-		B->setGanar(true);
-		cout << endl << B->getNombre() << " te ha derrotado mejor suerte la proxima" << endl;
-			
-	}
-	//Si alguno de los dos ganÛ se termina el programa	
-	if(A->getGanar() == true || B->getGanar() == true)
-	{
-		cout << "Presiona cualquier tecla para salir\n";
-		
-		
-		exit(0);
-	}
-	
-}
-
